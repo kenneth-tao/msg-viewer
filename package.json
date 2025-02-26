@@ -1,0 +1,77 @@
+{
+  "name": "msg-viewer",
+  "version": "1.0.0",
+  "description": "A lightweight application for viewing .msg files on macOS",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "dev": "webpack serve --mode development --open",
+    "prebuild": "npm run test",
+    "build": "webpack --mode production",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "lint": "eslint .",
+    "package": "npm run test && electron-builder build --mac",
+    "package-dmg": "npm run test && electron-builder build --mac --x64 --arm64 --universal",
+    "postinstall": "electron-builder install-app-deps"
+  },
+  "keywords": [
+    "email",
+    "msg",
+    "outlook",
+    "viewer"
+  ],
+  "author": "",
+  "license": "MIT",
+  "build": {
+    "appId": "com.msgviewer.app",
+    "productName": "MSG Viewer",
+    "mac": {
+      "category": "public.app-category.productivity",
+      "target": [
+        "dmg",
+        "zip"
+      ],
+      "darkModeSupport": true
+    },
+    "files": [
+      "build/**/*",
+      "main.js",
+      "preload.js",
+      "node_modules/**/*"
+    ]
+  },
+  "dependencies": {
+    "@electron/remote": "^2.1.2",
+    "msg-parser": "^1.0.10",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.26.9",
+    "@babel/preset-env": "^7.26.9",
+    "@babel/preset-react": "^7.26.3",
+    "@testing-library/jest-dom": "^6.6.3",
+    "@testing-library/react": "^16.2.0",
+    "@types/jest": "^29.5.14",
+    "@types/react": "^19.0.10",
+    "@types/react-dom": "^19.0.4",
+    "babel-loader": "^9.2.1",
+    "css-loader": "^7.1.2",
+    "electron": "^34.2.0",
+    "electron-builder": "^25.1.8",
+    "eslint": "^9.21.0",
+    "eslint-plugin-react": "^7.37.4",
+    "html-webpack-plugin": "^5.6.3",
+    "jest": "^29.7.0",
+    "jest-environment-jsdom": "^29.7.0",
+    "style-loader": "^4.0.0",
+    "ts-jest": "^29.2.6",
+    "ts-loader": "^9.5.2",
+    "typescript": "^5.7.3",
+    "webpack": "^5.98.0",
+    "webpack-cli": "^6.0.1",
+    "webpack-dev-server": "^5.2.0"
+  }
+}
