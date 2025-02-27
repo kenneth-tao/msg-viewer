@@ -1,6 +1,6 @@
 import React from 'react';
 import { MsgFile } from '../types';
-import { sanitizeHtml } from '../utils/helpers';
+import { sanitizeHtml, decodeHtmlEntities } from '../utils/helpers';
 
 interface EmailBodyProps {
   email: MsgFile;
@@ -10,10 +10,10 @@ const EmailBody: React.FC<EmailBodyProps> = ({ email }) => {
   // Prefer HTML content if available, otherwise use plain text
   const hasHtmlContent = !!email.bodyHTML && email.bodyHTML.trim() !== '';
   
-  // Create a sanitized version of the content
+  // Create a sanitized and decoded version of the content
   const sanitizedContent = hasHtmlContent 
     ? sanitizeHtml(email.bodyHTML) 
-    : email.body;
+    : decodeHtmlEntities(email.body);
   
   return (
     <div className="email-body">
@@ -21,7 +21,7 @@ const EmailBody: React.FC<EmailBodyProps> = ({ email }) => {
         {hasHtmlContent ? (
           // For HTML content, use dangerouslySetInnerHTML but with sanitized content
           <div 
-            dangerouslySetInnerHTML={{ __html: sanitizedContent }} 
+            dangerouslySetInnerHTML={{ __html: decodeHtmlEntities(sanitizedContent) }} 
             className="email-html-content"
           />
         ) : (

@@ -93,6 +93,19 @@ export const getFileIcon = (fileName: string): string => {
 };
 
 /**
+ * Decode HTML entities to their corresponding characters
+ * @param text - Text with HTML entities to decode
+ * @returns Decoded text
+ */
+export const decodeHtmlEntities = (text?: string): string => {
+  if (!text) return '';
+  
+  const textarea = document.createElement('textarea');
+  textarea.innerHTML = text;
+  return textarea.value;
+};
+
+/**
  * Safely render HTML content
  * @param htmlContent - HTML content to sanitize
  * @returns Sanitized HTML content
