@@ -1,7 +1,7 @@
 const { app, BrowserWindow, dialog, ipcMain } = require('electron');
 const path = require('path');
 const fs = require('fs');
-const msgParser = require('msg-parser');
+const { Msg, PidTagSubject, PidTagSenderName, PidTagDisplayTo, PidTagDisplayCc, PidTagBody, PidTagAttachFilename, PidTagAttachContentId } = require('msg-parser');
 const { initialize, enable } = require('@electron/remote/main');
 
 // Initialize remote module
@@ -85,9 +85,14 @@ ipcMain.handle('open-file-dialog', async () => {
   return filePaths[0];
 });
 
-// Handle MSG file parsing
+// Handle MSG file parsing with improved error handling
 ipcMain.handle('parse-msg-file', async (event, filePath) => {
   try {
+    // Validate input
+    if (!filePath) {
+      throw new Error('No file path provided');
+    }
+    
     // Validate file path to prevent path traversal attacks
     const normalizedPath = path.normalize(filePath);
     if (!normalizedPath.endsWith('.msg')) {
@@ -99,13 +104,34 @@ ipcMain.handle('parse-msg-file', async (event, filePath) => {
     
     // Parse the MSG file
     return new Promise((resolve, reject) => {
-      msgParser.parseFile(normalizedPath, (err, data) => {
+      fs.readFile(normalizedPath, (err, data) => {
         if (err) {
           reject(err);
         } else {
-          // Sanitize the data before sending to renderer
-          const sanitizedData = sanitizeMsgData(data);
-          resolve(sanitizedData);
+          try {
+            // Create a Msg object from the file data
+            const msg = Msg.fromUint8Array(new Uint8Array(data));
+            
+            // Extract relevant data from the MSG file
+            const extractedData = {
+              subject: msg.getProperty(PidTagSubject) || '',
+              from: msg.getProperty(PidTagSenderName) || '',
+              displayTo: msg.getProperty(PidTagDisplayTo) || '',
+              displayCc: msg.getProperty(PidTagDisplayCc) || '',
+              body: msg.getProperty(PidTagBody) || '',
+              attachments: msg.attachments().map(attachment => ({
+                fileName: attachment.getProperty(PidTagAttachFilename) || 'unnamed',
+                contentId: attachment.getProperty(PidTagAttachContentId) || '',
+                data: Buffer.from(attachment.content()).toString('base64')
+              }))
+            };
+            
+            // Sanitize the data before sending to renderer
+            const sanitizedData = sanitizeMsgData(extractedData);
+            resolve(sanitizedData);
+          } catch (error) {
+            reject(error);
+          }
         }
       });
     });
